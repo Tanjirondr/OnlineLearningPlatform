@@ -1,1 +1,1 @@
-# OnlineLearningPlatform
+This repository houses the backend logic for OnlineLearningPlatform, a project designed to streamline online education. Utilizing Flask, a lightweight WSGI web application framework, we implement various routes enabling functionalities such as listing available courses, fetching detailed information about specific courses, and handling course enrollments. The project aims to provide a solid foundation for building a comprehensive online learning platform, facilitating easy access to educational content and resources.
