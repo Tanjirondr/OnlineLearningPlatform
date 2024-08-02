@@ -66,5 +66,13 @@ def create_course():
     courses.append(new_course)
     return jsonify(new_course), 201
 
+@app.route('/courses/<int:course_id>/students', methods=['GET'])
+def get_course_students(course_id):
+    course = next((course for course in courses if course['id'] == course_id), None)
+    if course:
+        return jsonify({'course_name': course['name'], 'enrolled_students': course['enrolled_students']}), 200
+    else:
+        return jsonify({'message': 'Course not found'}), 404
+
 if __name__ == '__main__':
     app.run(debug=True)
