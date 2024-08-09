@@ -4,66 +4,66 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_URL = getenv('API_BASE_URL')
-HEADERS = {
+API_BASE_URL = getenv('API_BASE_URL')
+API_HEADERS = {
     'Content-Type': 'application/json',
     'Authorization': f"Bearer {getenv('API_KEY')}"
 }
 
-def create_course(course_data):
-    response = requests.post(f"{BASE_URL}/courses", json=course_data, headers=HEADERS)
+def create_new_course(course_details):
+    response = requests.post(f"{API_BASE_URL}/courses", json=course_details, headers=API_HEADERS)
     return response.json()
 
-def get_course(course_id):
-    response = requests.get(f"{BASE_URL}/courses/{course_id}", headers=HEADERS)
+def retrieve_course_details(course_identifier):
+    response = requests.get(f"{API_BASE_URL}/courses/{course_identifier}", headers=API_HEADERS)
     return response.json()
 
-def update_course(course_id, update_data):
-    response = requests.put(f"{BASE_URL}/courses/{course_id}", json=update_data, headers=HEADERS)
+def modify_course_details(course_identifier, new_details):
+    response = requests.put(f"{API_BASE_URL}/courses/{course_identifier}", json=new_details, headers=API_HEADERS)
     return response.json()
 
-def delete_course(course_id):
-    response = requests.delete(f"{BASE_URL}/courses/{course_id}", headers=HEADERS)
+def remove_course(course_identifier):
+    response = requests.delete(f"{API_BASE_URL}/courses/{course_identifier}", headers=API_HEADERS)
     return response.status_code
 
-def register_user(user_data):
-    response = requests.post(f"{BASE_URL}/users/register", json=user_data, headers=HEADERS)
+def register_new_user(user_details):
+    response = requests.post(f"{API_BASE_URL}/users/register", json=user_details, headers=API_HEADERS)
     return response.json()
 
-def login_user(credentials):
-    response = requests.post(f"{BASE_URL}/users/login", json=credentials, headers=HEADERS)
+def authenticate_user(login_credentials):
+    response = requests.post(f"{API_BASE_URL}/users/login", json=login_credentials, headers=API_HEADERS)
     return response.json()
 
-def enroll_user(course_id, user_id):
-    enrollment_data = {'user_id': user_id, 'course_id': course_id}
-    response = requests.post(f"{BASE_URL}/enrollments", json=enrollment_data, headers=HEADERS)
+def enroll_user_in_course(course_identifier, user_identifier):
+    enrollment_details = {'user_id': user_identifier, 'course_id': course_identifier}
+    response = requests.post(f"{API_BASE_URL}/enrollments", json=enrollment_details, headers=API_HEADERS)
     return response.json()
 
 if __name__ == "__main__":
-    user_data = {
+    user_details = {
         "name": "John Doe",
         "email": "john.doe@example.com",
         "password": "password123"
     }
-    course_data = {
+    course_details = {
         "title": "Introduction to Python",
         "description": "A course for beginners."
     }
-    credentials = {
+    login_credentials = {
         "email": "john.doe@example.com",
         "password": "password123"
     }
 
-    print(register_user(user_data))
-    user_response = login_user(credentials)
-    print(user_response)
+    print(register_new_user(user_details))
+    user_login_response = authenticate_user(login_credentials)
+    print(user_login_response)
 
-    course_response = create_course(course_data)
-    print(course_response)
-    course_id = course_response.get('id')
-    print(get_course(course_id))
-    print(update_course(course_id, {"title": "Python for All"}))
-    print(delete_course(course_id))
+    course_creation_response = create_new_course(course_details)
+    print(course_creation_response)
+    created_course_id = course_creation_response.get('id')
+    print(retrieve_course_details(created_course_id))
+    print(modify_course_details(created_course_id, {"title": "Python for All"}))
+    print(remove_course(created_course_id))
     
-    user_id = user_response.get('user', {}).get('id')
-    print(enroll_user(course_id, user_id))
+    logged_user_id = user_login_response.get('user', {}).get('id')
+    print(enroll_user_in_course(created_course_id, logged_user_id))
