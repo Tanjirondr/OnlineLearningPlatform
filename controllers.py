@@ -5,38 +5,58 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_BASE_URL = getenv('API_BASE_URL')
-API_HEADERS = {
-    'Content-Type': 'application/json',
-    'Authorization': f"Bearer {getenv('API_KEY')}"
-}
+API_KEY = getenv('API_KEY')
+
+def get_headers():
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': f"Bearer {API_KEY}"
+    }
+
+def send_request(method, endpoint, payload=None):
+    url = f"{API_BASE_URL}/{endpoint}"
+    headers = get_headers()
+
+    if method == "GET":
+        response = requests.get(url, headers=headers)
+    elif method == "POST":
+        response = requests.post(url, json=payload, headers=headers)
+    elif method == "PUT":
+        response = requests.put(url, json=payload, headers=headers)
+    elif method == "DELETE":
+        response = requests.delete(url, headers=headers)
+    else:
+        raise ValueError("Unsupported HTTP method")
+
+    return response
 
 def create_new_course(course_details):
-    response = requests.post(f"{API_BASE_URL}/courses", json=course_details, headers=API_HEADERS)
+    response = send_request("POST", "courses", course_details)
     return response.json()
 
 def retrieve_course_details(course_identifier):
-    response = requests.get(f"{API_BASE_URL}/courses/{course_identifier}", headers=API_HEADERS)
+    response = send_request("GET", f"courses/{course_identifier}")
     return response.json()
 
 def modify_course_details(course_identifier, new_details):
-    response = requests.put(f"{API_BASE_URL}/courses/{course_identifier}", json=new_details, headers=API_HEADERS)
+    response = send_request("PUT", f"courses/{course_identifier}", new_details)
     return response.json()
 
 def remove_course(course_identifier):
-    response = requests.delete(f"{API_BASE_URL}/courses/{course_identifier}", headers=API_HEADERS)
+    response = send_request("DELETE", f"courses/{course_identifier}")
     return response.status_code
 
 def register_new_user(user_details):
-    response = requests.post(f"{API_BASE_URL}/users/register", json=user_details, headers=API_HEADERS)
+    response = send_request("POST", "users/register", user_details)
     return response.json()
 
 def authenticate_user(login_credentials):
-    response = requests.post(f"{API_BASE_URL}/users/login", json=login_credentials, headers=API_HEADERS)
+    response = send_request("POST", "users/login", login_credentials)
     return response.json()
 
 def enroll_user_in_course(course_identifier, user_identifier):
     enrollment_details = {'user_id': user_identifier, 'course_id': course_identifier}
-    response = requests.post(f"{API_BASE_URL}/enrollments", json=enrollment_details, headers=API_HEADERS)
+    response = send_request("POST", "enrollments", enrollment_details)
     return response.json()
 
 if __name__ == "__main__":
