@@ -19,13 +19,31 @@ func NewNotifier(apiKey string) *Notifier {
 	}
 }
 
-func (n *Notifier) Start() {
+type Logger struct {
+}
+
+func NewLogger() *Logger {
+	return &Logger{}
+}
+
+func (l *Logger) Info(msg string) {
+	log.Printf("INFO: %s", msg)
+}
+
+func (l *Logger) Error(msg string) {
+	log.Printf("ERROR: %s", msg)
+}
+
+func (n *Notifier) Start(logger *Logger) {
 	http.HandleFunc("/notify", n.handleNotification)
-	log.Println("Notifier service started on :8080")
-	http.ListenAndServe(":8080", nil)
+	logger.Info("Notifier service started on :8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		logger.Error(fmt.Sprintf("Failed to start server: %s", err.Error()))
+	}
 }
 
 func (n *Notifier) handleNotification(w http.ResponseWriter, r *http.Request) {
+	log.Println("Processing notification")
 	fmt.Fprintf(w, "Notification processed")
 }
 
@@ -41,5 +59,6 @@ func main() {
 	}
 
 	notifier := NewNotifier(apiKey)
-	notifier.Start()
+	logger := NewLogger()
+	notifier.Start(logger)
 }
