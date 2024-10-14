@@ -12,16 +12,20 @@ import (
 )
 
 type Notifier struct {
-    apiKey     string
-    cache      map[string]string // Adding a simple cache
-    cacheMutex *sync.RWMutex     // Protects cache
+    apiKey       string
+    cache        map[string]string // Adding a simple cache
+    cacheMutex   *sync.RWMutex     // Protects cache
+    notifyChan   chan string       // Channel for notifications
+    shutdownChan chan struct{}     // Channel for graceful shutdown
 }
 
 func NewNotifier(apiKey string) *Notifier {
     return &Notifier{
-        apiKey:     apiKey,
-        cache:      make(map[string]string),
-        cacheMutex: new(sync.RWMutex),
+        apiKey:       apiKey,
+        cache:        make(map[string]string),
+        cacheMutex:   new(sync.RWMutex),
+        notifyChan:   make(chan string, 100), // Buffered channel for notifications
+        shutdownChan: make(chan struct{}),
     }
 }
 
@@ -41,47 +45,40 @@ func (l *Logger) Error(msg string) {
 
 func (n *Notifier) Start(logger *Logger) {
     http.HandleFunc("/notify", n.handleNotification)
+    http.HandleFunc("/health", n.handleHealthCheck) // Health check endpoint
+    go n.processNotifications(logger)                // Start processing notifications asynchronously
     logger.Info("Notifier service started on :8080")
     if err := http.ListenAndServe(":8080", nil); err != nil {
         logger.Error(fmt.Sprintf("Failed to start server: %s", err.Error()))
     }
 }
 
-// Demonstrates a simple "batching" strategy - a placeholder for more complex logic
-func (n *Notifier) aggregateNotifications(notifications []string) {
-    // Imagine this function batches notifications and sends them out every X seconds
-    // Placeholder: details on actual batching and sending logic to be implemented
-}
-
-// Example caching mechanism in action
-func (n *Notifier) getCachedResponse(key string) (string, bool) {
-    n.cacheMutex.RLock()
-    defer n.cacheMutex.RUnlock()
-    value, found := n.cache[key]
-    return value, found
-}
-
-func (n *Notifier) setCache(key string, value string) {
-    n.cacheMutex.Lock()
-    defer n.cacheMutex.Unlock()
-    n.cache[key] = value
+// Process notifications asynchronously
+func (n *Notifier) processNotifications(logger *Logger) {
+    for {
+        select {
+        case notification := <-n.notifyChan:
+            // Here we can aggregate and process the notification
+            logger.Info(fmt.Sprintf("Processing notification: %s", notification))
+            // Simulate notification processing delay
+            time.Sleep(2 * time.Second)
+        case <-n.shutdownChan:
+            return
+        }
+    }
 }
 
 func (n *Notifier) handleNotification(w http.ResponseWriter, r *http.Request) {
-    log.Println("Processing notification")
-    // Example of using cache
-    if val, found := n.getCachedResponse("key"); found {
-        fmt.Fprintf(w, "Cached: %s", val)
-        return
-    }
+    log.Println("Received a notification")
 
-    // Process and respond to notification here
-    // *Actual API call or calculation would go here*
+    // Directly send notification to processing channel
+    n.notifyChan <- "Notification received" // Placeholder for actual notification data
 
-    // Cache the response (simplified example)
-    n.setCache("key", "Notification processed")
+    fmt.Fprintf(w, "Notification received and will be processed")
+}
 
-    fmt.Fprintf(w, "Notification processed")
+func (n *Notifier) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, "Service is up and running")
 }
 
 func main() {
