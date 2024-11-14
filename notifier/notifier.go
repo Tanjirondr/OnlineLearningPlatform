@@ -9,7 +9,7 @@ import (
 
 func init() {
 	if err := godotenv.Load(); err != nil {
-		fmt.Printf("No .env file found")
+		fmt.Println("No .env file found")
 	}
 }
 
@@ -21,21 +21,21 @@ type User struct {
 	Email string
 }
 
-func SendNotification(user User, notification Notification) {
+func sendNotification(user User, notification Notification) {
 	fmt.Printf("Sending notification to %s: %s\n", user.Email, notification.Message)
 }
 
-func NotifyUsersAboutNewCourse(users []User, courseName string) {
+func notifyAllUsersAboutNewCourse(users []User, courseName string) {
 	notification := Notification{Message: fmt.Sprintf("New course available: %s", courseName)}
 	for _, user := range users {
-		SendNotification(user, notification)
+		sendNotification(user, notification)
 	}
 }
 
-func NotifyUsersAboutUpdatedCourse(users []User, courseName string) {
+func notifyAllUsersAboutCourseUpdate(users []User, courseName string) {
 	notification := Notification{Message: fmt.Sprintf("Course updated: %s", courseName)}
 	for _, user := range users {
-		SendNotification(user, notification)
+		sendNotification(user, notification)
 	}
 }
 
@@ -45,6 +45,6 @@ func main() {
 		{Email: "user2@example.com"},
 	}
 
-	NotifyUsersAboutNewCourse(users, "Go Programming")
-	NotifyUsersAboutUpdatedCourse(users, "Advanced Go Programming")
+	notifyAllUsersAboutNewCourse(users, "Go Programming")
+	notifyAllUsersAboutCourseUpdate(users, "Advanced Go Programming")
 }
