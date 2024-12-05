@@ -1,17 +1,17 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import CourseList from './CourseList';
-import CourseDetail from './CourseDetail';
+import { BrowserRouter as AppRouter, Route, Switch } from 'react-router-dom';
+import CourseListView from './CourseList';
+import CourseDetailView from './CourseDetail';
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <AppRouter>
       <Switch>
-        <Route exact path="/" component={CourseList} />
-        <Route path="/course/:id" component={CourseDetail} />
-        <Route render={() => <CourseList />} />
+        <Route exact path="/" component={CourseListView} />
+        <Route path="/course/:id" component={CourseDetailView} />
+        <Route render={() => <CourseListView />} />
       </Switch>
-    </Router>
+    </AppRouter>
   );
 };
 
