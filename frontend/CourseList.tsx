@@ -6,14 +6,30 @@ interface ICourse {
   description: string;
 }
 
+const CourseItem: React.FC<ICourse> = ({ id, name, description }) => (
+  <li key={id}>
+    {name}: {description}
+  </li>
+);
+
 const CoursesList: React.FC = () => {
   const [courses, setCourses] = useState<ICourse[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchCourses = async () => {
+    const backendUrl = process.env.REACT_APP_BACKEND_URL;
+    if (!backendUrl) {
+      console.error("REACT_APP_BACKEND_URL is not defined.");
+      setIsLoading(false);
+      return;
+    }
+
+    const url = `${backendUrl}/courses`;
     try {
-      setIsLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/courses`);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Error fetching courses: ${response.statusText}`);
+      }
       const data: ICourse[] = await response.json();
       setCourses(data);
     } catch (error) {
@@ -24,23 +40,23 @@ const CoursesList: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchCourses(); 
+    fetchCourses();
   }, []);
 
+  if (isLoading) {
+    return <p>Loading courses...</p>;
+  }
+
+  if (courses.length === 0) {
+    return <p>No courses available.</p>;
+  }
+
   return (
-    <div>
-      {isLoading ? (
-        <p>Loading courses...</p>
-      ) : courses.length > 0 ? (
-        <ul>
-          {courses.map((course) => (
-            <li key={course.id}>{course.name}: {course.description}</li>
-          ))}
-        </ul>
-      ) : (
-        <p>No courses available.</p>
-      )}
-    </div>
+    <ul>
+      {courses.map(course => (
+        <CourseItem key={course.id} {...course} />
+      ))}
+    </ul>
   );
 };
 
